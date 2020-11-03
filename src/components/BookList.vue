@@ -1,15 +1,25 @@
 <template>
   <div>
-    <h1>{{title}}</h1>
+    <h1>{{ title }}</h1>
     <ul>
-      <book-item v-for='book in books' :key='book.id' :book='book'></book-item>
+      <book-item v-for="book in books" :key="book.id" :book="book"></book-item>
     </ul>
-    <br><hr>
-    <book-form @addBook='appendBook'></book-form>
+    <hr />
+    <h2>Filtered Books by Ownership</h2>
+    <select v-model="holding">
+      <option v-for="filter in filters">{{ filter }}</option>
+    </select>
+    <ul>
+      <book-item v-for="book in filteredBooks" :key="book.id" :book="book"></book-item>
+    </ul>
+    <br />
+    <hr />
+    <book-form @addBook="appendBook"></book-form>
   </div>
 </template>
 
 <script>
+import _ from "lodash";
 import BookItem from "./BookItem";
 import BookForm from "./BookForm";
 
@@ -19,22 +29,50 @@ export default {
     return {
       title: "All Books",
       states: ["Want to Read", "Read", "Reading"],
+      filters: ["bought", "borrowed"],
+      holding: "bought",
       books: [
-        { finishedReading: true, title: "Self-Reliance", author: "Ralph Waldo Emerson" },
-        { finishedReading: false, title: "American Gods", author: "Neil Gaiman" },
-        { finishedReading: true, title: "Amusing Ourselves to Death", author: "Neil Postman" }
-      ]
+        {
+          ownership: "borrowed",
+          finishedReading: true,
+          title: "Self-Reliance",
+          author: "Ralph Waldo Emerson",
+        },
+        {
+          ownership: "bought",
+          finishedReading: false,
+          title: "American Gods",
+          author: "Neil Gaiman",
+        },
+        {
+          ownership: "borrowed",
+          finishedReading: true,
+          title: "Amusing Ourselves to Death",
+          author: "Neil Postman",
+        },
+      ],
     };
   },
   components: {
     BookItem,
-    BookForm
+    BookForm,
+  },
+
+  computed: {
+    filteredBooks() {
+      return _.filter(this.books, ["ownership", this.holding]);
+    },
   },
   methods: {
     appendBook(bookData) {
-      this.books.push({ title: bookData.bookTitle, author: bookData.bookAuthor, finishedReading: bookData.finishedReading });
-    }
-  }
+      this.books.push({
+        title: bookData.bookTitle,
+        author: bookData.bookAuthor,
+        finishedReading: bookData.finishedReading,
+        ownership: bookData.ownership,
+      });
+    },
+  },
 };
 </script>
 
